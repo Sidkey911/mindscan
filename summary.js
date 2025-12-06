@@ -53,6 +53,51 @@ if (summaryUser) {
 const history = loadHistory();
 
 if (!history.length) {
+     // Weekly chart (last 7 days, average per day)
+  const chartCanvas = document.getElementById("weeklyChart");
+  if (chartCanvas) {
+    const byDate = {};
+    history.forEach((h) => {
+      if (!h.date) return;
+      if (!byDate[h.date]) byDate[h.date] = [];
+      byDate[h.date].push(Number(h.score) || 0);
+    });
+
+    const allDates = Object.keys(byDate).sort(); // ascending
+    const last7 = allDates.slice(-7);
+
+    const labels = last7;
+    const data = last7.map((d) => {
+      const arr = byDate[d];
+      const sum = arr.reduce((a, b) => a + b, 0);
+      return (sum / arr.length).toFixed(2);
+    });
+
+    new Chart(chartCanvas.getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Average score",
+            data,
+            tension: 0.3,
+            fill: false,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        scales: {
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 13
+          }
+        }
+      }
+    });
+  }
+
   if (summaryNone) summaryNone.hidden = false;
   if (summaryStats) summaryStats.style.display = "none";
 } else {
