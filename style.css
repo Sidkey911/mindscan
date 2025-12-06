@@ -120,6 +120,21 @@ select:focus {
   max-height: 260px;
 }
 
+.report-content {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.report-content p {
+  margin-bottom: 6px;
+}
+
+.report-content ul {
+  margin-left: 18px;
+  margin-top: 4px;
+}
+
 
 .btn {
   border-radius: 999px;
