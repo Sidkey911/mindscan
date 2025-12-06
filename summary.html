@@ -5,11 +5,10 @@
   <title>MindScan Lite - Summary</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-</head>
-    <link rel="icon" href="icon-192.png" />
+  <link rel="icon" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.json" />
-
+</head>
 <body>
   <header class="header">
     <h1>MindScan Lite – Summary</h1>
@@ -21,64 +20,86 @@
   </header>
 
   <main class="container">
+
+    <!-- Overall stats -->
     <section class="card">
       <h2>Overall stats</h2>
-      <p id="summaryNone" class="hint" hidden>No scans found yet. Go back and run MindScan at least once.</p>
+      <p id="summaryNone" class="hint" hidden>
+        No scans found yet. Go back and run MindScan at least once.
+      </p>
       <div id="summaryStats">
         <p>Total scans: <strong id="totalScans">0</strong></p>
         <p>Average score: <strong id="avgScore">0.0</strong></p>
         <p>Last scan date: <strong id="lastDate">-</strong></p>
-        <p>Last score: <strong id="lastScore">-</strong> (<span id="lastLabel">-</span>)</p>
+        <p>
+          Last score:
+          <strong id="lastScore">-</strong>
+          (<span id="lastLabel">-</span>)
+        </p>
       </div>
     </section>
-        <section class="card">
+
+    <!-- Weekly graph -->
+    <section class="card">
       <h2>Weekly wellness graph</h2>
-      <p class="hint">Average score for the last 7 days (based on your saved scans).</p>
+      <p class="hint">
+        Average score for the last 7 days (based on your saved scans).
+      </p>
       <div class="chart-wrapper">
         <canvas id="weeklyChart"></canvas>
       </div>
     </section>
 
-
+    <!-- Category breakdown -->
     <section class="card">
       <h2>Category breakdown</h2>
-      <p class="hint">How many of your scans were in each colour zone.</p>
+      <p class="hint">
+        How many of your scans were in each colour zone.
+      </p>
       <ul class="history-list" id="categoryList"></ul>
     </section>
 
+    <!-- All scans -->
     <section class="card">
       <h2>All past scans</h2>
-          <section class="card">
-      <h2>Personal wellness report</h2>
-      <p class="hint">
-        This report is generated automatically from your saved scans. You can print or save it as PDF.
-      </p>
-      <div id="reportContent" class="report-content"></div>
-      <button type="button" class="btn" id="generateReportBtn">Generate report</button>
-      <button type="button" class="btn btn-secondary" id="printReportBtn">Print / Save as PDF</button>
-    </section>
-
       <p class="hint">Newest first (local device only).</p>
       <ul class="history-list" id="allScansList"></ul>
     </section>
+
+    <!-- User info -->
+    <section class="card">
+      <h2>User information</h2>
+      <p id="summaryUser" class="hint">
+        No profile saved yet. You can fill in your details on the main page.
+      </p>
+    </section>
+
+    <!-- Personal wellness report -->
+    <section class="card">
+      <h2>Personal wellness report</h2>
+      <p class="hint">
+        This report is generated automatically from your saved scans.
+        You can print or save it as PDF.
+      </p>
+      <div id="reportContent" class="report-content"></div>
+      <button type="button" class="btn" id="generateReportBtn">
+        Generate report
+      </button>
+      <button type="button" class="btn btn-secondary" id="printReportBtn">
+        Print / Save as PDF
+      </button>
+    </section>
+
   </main>
-  <section class="card">
-  <h2>User Information</h2>
-  <p id="summaryUser"></p>
-    <p id="summaryNone"></p>
-<div id="summaryStats"></div>
-<ul id="categoryList"></ul>
-<ul id="allScansList"></ul>
-<p id="summaryUser"></p>
-
-</section>
-
 
   <footer class="footer">
     <small>MindScan Lite - Local summary view</small>
   </footer>
 
+  <!-- Chart.js must load BEFORE summary.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="summary.js"></script>
 </body>
 </html>
+
+
