@@ -1,4 +1,8 @@
 // MindScan Lite - Web Version
+const PROFILE_KEY = "mindscan_profile_v1";
+
+const profileForm = document.getElementById("profileForm");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
 
 const form = document.getElementById("scanForm");
 const clearBtn = document.getElementById("clearBtn");
@@ -35,6 +39,30 @@ function loadHistory() {
 function saveHistory(history) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 }
+function loadProfile() {
+  try {
+    const data = JSON.parse(localStorage.getItem(PROFILE_KEY));
+    return data || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveProfile(data) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+}
+
+function fillProfileForm() {
+  const p = loadProfile();
+  if (!profileForm) return;
+  profileForm.name.value = p.name || "";
+  profileForm.age.value = p.age || "";
+  profileForm.gender.value = p.gender || "";
+  profileForm.studentId.value = p.studentId || "";
+  profileForm.course.value = p.course || "";
+  profileForm.email.value = p.email || "";
+}
+
 
 // --------- Score interpretation (per-score suggestions) ----------
 
@@ -284,6 +312,20 @@ form?.addEventListener("submit", (e) => {
   const score = computeScore(values);
   const interpretation = interpretScore(score);
   renderResult(score, interpretation);
+  saveProfileBtn?.addEventListener("click", () => {
+  const data = {
+    name: profileForm.name.value.trim(),
+    age: profileForm.age.value.trim(),
+    gender: profileForm.gender.value,
+    studentId: profileForm.studentId.value.trim(),
+    course: profileForm.course.value.trim(),
+    email: profileForm.email.value.trim()
+  };
+
+  saveProfile(data);
+  alert("Profile saved successfully!");
+});
+
 
   // Save to history with date
   const today = new Date();
@@ -340,6 +382,7 @@ if (extraTipsBtn) {
 // Initial load
 renderHistory();
 
-   
+ fillProfileForm();
+  
    
  
