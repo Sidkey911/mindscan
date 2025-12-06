@@ -1,9 +1,10 @@
-// MindScan Lite - Web Version
+// MindScan Lite - Main Page Logic
+
+// ---------- CONSTANTS ----------
+const HISTORY_KEY = "mindscan_history_v1";
 const PROFILE_KEY = "mindscan_profile_v1";
 
-const profileForm = document.getElementById("profileForm");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-
+// ---------- DOM ELEMENTS ----------
 const form = document.getElementById("scanForm");
 const clearBtn = document.getElementById("clearBtn");
 
@@ -17,19 +18,21 @@ const suggestionList = document.getElementById("suggestionList");
 const historyList = document.getElementById("historyList");
 const clearHistoryBtn = document.getElementById("clearHistory");
 
-// NEW: breathing + extra tips elements
+// Profile elements
+const profileForm = document.getElementById("profileForm");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+
+// Breathing & tips
 const breathingCircle = document.getElementById("breathingCircle");
 const breathingInstruction = document.getElementById("breathingInstruction");
 const breathingToggle = document.getElementById("breathingToggle");
-
 const extraTipsBtn = document.getElementById("extraTipsBtn");
 const extraTipsList = document.getElementById("extraTipsList");
 
-const STORAGE_KEY = "mindscan_history_v1";
-
+// ---------- STORAGE HELPERS ----------
 function loadHistory() {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const data = JSON.parse(localStorage.getItem(HISTORY_KEY));
     return Array.isArray(data) ? data : [];
   } catch {
     return [];
@@ -37,8 +40,9 @@ function loadHistory() {
 }
 
 function saveHistory(history) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
+
 function loadProfile() {
   try {
     const data = JSON.parse(localStorage.getItem(PROFILE_KEY));
@@ -52,9 +56,10 @@ function saveProfile(data) {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
 }
 
+// ---------- PROFILE HANDLING ----------
 function fillProfileForm() {
-  const p = loadProfile();
   if (!profileForm) return;
+  const p = loadProfile();
   profileForm.name.value = p.name || "";
   profileForm.age.value = p.age || "";
   profileForm.gender.value = p.gender || "";
@@ -63,14 +68,10 @@ function fillProfileForm() {
   profileForm.email.value = p.email || "";
 }
 
-
-// --------- Score interpretation (per-score suggestions) ----------
-
+// ---------- SCORE INTERPRETATION ----------
 function interpretScore(score) {
-  // Round score to nearest integer, avoid negative
   const s = Math.max(0, Math.round(score));
 
-  // 1) Decide colour + main message
   let status, label, message;
   if (s >= 9) {
     status = "green";
@@ -89,7 +90,6 @@ function interpretScore(score) {
       "Your answers suggest a high level of stress or low mood. It is important to rest and, if possible, talk to someone you trust.";
   }
 
-  // 2) Suggestions for EACH exact score (0–13)
   const suggestionMap = {
     0: [
       "Stop everything for a moment and check basic needs: have you eaten, drunk water, and slept enough?",
@@ -174,8 +174,7 @@ function interpretScore(score) {
   return { status, label, message, suggestions };
 }
 
-// --------- Scoring ----------
-
+// ---------- SCORING ----------
 function computeScore(values) {
   const sleep = Number(values.sleep);
   const energy = Number(values.energy);
@@ -184,13 +183,11 @@ function computeScore(values) {
   const screen = Number(values.screen);
   const mood = Number(values.mood);
 
-  // Positive indicators
   const sleepPts = sleep;
   const energyPts = energy;
   const motivationPts = motivation;
   const moodPts = mood;
 
-  // Negative indicators
   const stressPenalty = stress;
   let screenPenalty = 0;
   if (screen === 2) screenPenalty = 1;
@@ -199,16 +196,14 @@ function computeScore(values) {
   const raw =
     sleepPts + energyPts + motivationPts + moodPts - (stressPenalty + screenPenalty);
 
-  // Keep minimum zero
   return Math.max(0, raw);
 }
 
-// --------- Render result + history ----------
-
+// ---------- RENDERING ----------
 function renderResult(score, interpretation) {
+  if (!resultCard) return;
   resultCard.hidden = false;
 
-  // Clear previous classes
   resultBadge.classList.remove("status-green", "status-yellow", "status-red");
 
   if (interpretation.status === "green") {
@@ -232,6 +227,7 @@ function renderResult(score, interpretation) {
 }
 
 function renderHistory() {
+  if (!historyList) return;
   const history = loadHistory();
 
   historyList.innerHTML = "";
@@ -249,8 +245,8 @@ function renderHistory() {
       const li = document.createElement("li");
       const left = document.createElement("span");
       const right = document.createElement("span");
-      left.textContent = item.date + " - " + item.label;
-      right.textContent = "Score " + item.score.toFixed(1);
+      left.textContent = `${item.date} - ${item.label}`;
+      right.textContent = "Score " + Number(item.score).toFixed(1);
       right.className = "history-score";
       li.appendChild(left);
       li.appendChild(right);
@@ -258,8 +254,7 @@ function renderHistory() {
     });
 }
 
-// --------- Extra wellness tips (random) ----------
-
+// ---------- EXTRA TIPS ----------
 const extraTipsPool = [
   "Take 5 deep breaths before you check your phone in the morning.",
   "Keep a water bottle on your table and sip every 20 minutes.",
@@ -294,8 +289,9 @@ function renderExtraTips() {
   });
 }
 
-// --------- Event listeners ----------
+// ---------- EVENT LISTENERS ----------
 
+// Main form
 form?.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -312,22 +308,7 @@ form?.addEventListener("submit", (e) => {
   const score = computeScore(values);
   const interpretation = interpretScore(score);
   renderResult(score, interpretation);
-  saveProfileBtn?.addEventListener("click", () => {
-  const data = {
-    name: profileForm.name.value.trim(),
-    age: profileForm.age.value.trim(),
-    gender: profileForm.gender.value,
-    studentId: profileForm.studentId.value.trim(),
-    course: profileForm.course.value.trim(),
-    email: profileForm.email.value.trim()
-  };
 
-  saveProfile(data);
-  alert("Profile saved successfully!");
-});
-
-
-  // Save to history with date
   const today = new Date();
   const dateStr = today.toISOString().slice(0, 10);
 
@@ -343,17 +324,32 @@ form?.addEventListener("submit", (e) => {
 
 clearBtn?.addEventListener("click", () => {
   form.reset();
-  resultCard.hidden = true;
+  if (resultCard) resultCard.hidden = true;
 });
 
 clearHistoryBtn?.addEventListener("click", () => {
   if (confirm("Clear all saved scan history from this browser?")) {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(HISTORY_KEY);
     renderHistory();
   }
 });
 
-// Breathing toggle with automated 4–4–4 cycle
+// Profile save
+saveProfileBtn?.addEventListener("click", () => {
+  if (!profileForm) return;
+  const data = {
+    name: profileForm.name.value.trim(),
+    age: profileForm.age.value.trim(),
+    gender: profileForm.gender.value,
+    studentId: profileForm.studentId.value.trim(),
+    course: profileForm.course.value.trim(),
+    email: profileForm.email.value.trim()
+  };
+  saveProfile(data);
+  alert("Profile saved successfully!");
+});
+
+// Breathing toggle with automated 4-4-4 cycle
 if (breathingToggle && breathingCircle && breathingInstruction) {
   let breathingOn = false;
   let breathingTimer = null;
@@ -378,7 +374,7 @@ if (breathingToggle && breathingCircle && breathingInstruction) {
       }
 
       phase = (phase + 1) % 3;
-      breathingTimer = setTimeout(nextPhase, 4000); // 4s per phase
+      breathingTimer = setTimeout(nextPhase, 4000);
     }
 
     nextPhase();
@@ -404,22 +400,17 @@ if (breathingToggle && breathingCircle && breathingInstruction) {
     }
   });
 
-  // Set initial text
   resetBreathingText();
 }
 
-
-// Extra tips button
+// Extra tips
 if (extraTipsBtn) {
   extraTipsBtn.addEventListener("click", renderExtraTips);
-  // show once on load
-  renderExtraTips();
 }
 
-// Initial load
+// ---------- INITIALISE ----------
+fillProfileForm();
 renderHistory();
+renderExtraTips();
 
- fillProfileForm();
   
-   
- 
