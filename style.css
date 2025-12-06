@@ -134,6 +134,15 @@ select:focus {
 .btn:hover {
   opacity: 0.95;
 }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #64748b;
+  color: #e5e7eb;
+}
+
+.btn-secondary:hover {
+  background: #0f172a;
+}
 
 .result-badge {
   display: flex;
