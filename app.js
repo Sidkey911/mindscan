@@ -1,20 +1,14 @@
-// MindScan Lite - main logic (stable version)
+// MindScan Lite - main logic (final stable version)
 
 // ---------- CONSTANTS ----------
 var HISTORY_KEY = "mindscan_history_v1";
 var PROFILE_KEY = "mindscan_profile_v1";
-
-// ---------- DOM ELEMENTS ----------
-var insightsText = document.getElementById("insightsText");
-var form = document.getElementById("scanForm");
-var clearBtn = document.getElementById("clearBtn");
-var habitsForm = document.getElementById("habitsForm");
-var habitScoreText = document.getElementById("habitScoreText");
-
 var HABITS_KEY = "mindscan_habits_v1";
-var themeToggle = document.getElementById("themeToggle");
 var THEME_KEY = "mindscan_theme";
 
+// ---------- DOM ELEMENTS ----------
+var form = document.getElementById("scanForm");
+var clearBtn = document.getElementById("clearBtn");
 
 var resultCard = document.getElementById("resultCard");
 var resultBadge = document.getElementById("resultBadge");
@@ -28,6 +22,7 @@ var clearHistoryBtn = document.getElementById("clearHistory");
 
 var scoreBarInner = document.getElementById("scoreBarInner");
 var scoreBarLabel = document.getElementById("scoreBarLabel");
+
 var wellnessAvatar = document.getElementById("wellnessAvatar");
 var avatarText = document.getElementById("avatarText");
 
@@ -44,6 +39,16 @@ var breathingToggle = document.getElementById("breathingToggle");
 var extraTipsBtn = document.getElementById("extraTipsBtn");
 var extraTipsList = document.getElementById("extraTipsList");
 
+// Habits
+var habitsForm = document.getElementById("habitsForm");
+var habitScoreText = document.getElementById("habitScoreText");
+
+// Insights
+var insightsText = document.getElementById("insightsText");
+
+// Theme
+var themeToggle = document.getElementById("themeToggle");
+
 // ---------- STORAGE HELPERS ----------
 function loadHistory() {
   try {
@@ -53,6 +58,24 @@ function loadHistory() {
     return [];
   }
 }
+
+function saveHistory(history) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function loadProfile() {
+  try {
+    var data = JSON.parse(localStorage.getItem(PROFILE_KEY));
+    return data || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveProfile(data) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+}
+
 function todayKey() {
   var d = new Date();
   return d.toISOString().slice(0, 10);
@@ -71,58 +94,6 @@ function loadHabits() {
 
 function saveHabits(all) {
   localStorage.setItem(HABITS_KEY, JSON.stringify(all));
-}
-
-function updateHabitUI() {
-  if (!habitsForm || !habitScoreText) return;
-  var all = loadHabits();
-  var today = todayKey();
-  var todayData = all[today] || {};
-  var total = 5;
-  var done = 0;
-
-  ["sleep7", "water", "movement", "mindful", "lowScreen"].forEach(function (name) {
-    var input = habitsForm.elements[name];
-    if (input) {
-      input.checked = !!todayData[name];
-      if (input.checked) done++;
-    }
-  });
-
-  habitScoreText.textContent = "Today’s habit score: " + done + " / " + total;
-}
-
-if (habitsForm) {
-  habitsForm.addEventListener("change", function () {
-    var all = loadHabits();
-    var today = todayKey();
-    all[today] = {
-      sleep7: habitsForm.elements["sleep7"].checked,
-      water: habitsForm.elements["water"].checked,
-      movement: habitsForm.elements["movement"].checked,
-      mindful: habitsForm.elements["mindful"].checked,
-      lowScreen: habitsForm.elements["lowScreen"].checked
-    };
-    saveHabits(all);
-    updateHabitUI();
-  });
-}
-
-function saveHistory(history) {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-}
-
-function loadProfile() {
-  try {
-    var data = JSON.parse(localStorage.getItem(PROFILE_KEY));
-    return data || {};
-  } catch (e) {
-    return {};
-  }
-}
-
-function saveProfile(data) {
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
 }
 
 // ---------- PROFILE ----------
@@ -266,26 +237,6 @@ function interpretScore(score) {
       "Plan one small positive action for yourself before the day ends."
     ];
   }
-  // Wellness avatar
-  if (wellnessAvatar && avatarText) {
-    var emoji;
-    var text;
-    if (interpretation.status === "green") {
-      emoji = "🟢";
-      text =
-        "You are generally coping well today. Keep balanced habits and regular breaks.";
-    } else if (interpretation.status === "yellow") {
-      emoji = "🟡";
-      text =
-        "Early signs of stress. Try to slow down a bit and use breathing or a short walk.";
-    } else {
-      emoji = "🔴";
-      text =
-        "Your stress seems high. Please prioritise rest and, if possible, talk to someone you trust.";
-    }
-    wellnessAvatar.textContent = emoji;
-    avatarText.textContent = text;
-  }
 
   return { status: status, label: label, message: message, suggestions: suggestions };
 }
@@ -333,140 +284,42 @@ function renderResult(score, interpretation) {
     scoreBarLabel.textContent =
       desc + " (" + score.toFixed(1) + " / " + maxScore + ")";
   }
+
+  // wellness avatar
+  if (wellnessAvatar && avatarText) {
+    var emoji;
+    var text;
+    if (interpretation.status === "green") {
+      emoji = "🟢";
+      text =
+        "You are generally coping well today. Keep balanced habits and regular breaks.";
+    } else if (interpretation.status === "yellow") {
+      emoji = "🟡";
+      text =
+        "Early signs of stress. Try to slow down a bit and use breathing or a short walk.";
+    } else {
+      emoji = "🔴";
+      text =
+        "Your stress seems high. Please prioritise rest and, if possible, talk to someone you trust.";
+    }
+    wellnessAvatar.textContent = emoji;
+    avatarText.textContent = text;
+  }
 }
 
 // ---------- HISTORY ----------
 function renderHistory() {
   if (!historyList) return;
   var history = loadHistory();
-  function generateInsights() {
-  if (!insightsText) return;
-
-  var history = loadHistory();
-  if (!history.length) {
-    insightsText.textContent =
-      "Run MindScan a few times and we will show patterns in your stress, mood and habits here.";
-    return;
-  }
-
-  var last = history[history.length - 1];
-  var total = history.length;
-  var sum = 0;
-  var redCount = 0;
-  var yellowCount = 0;
-  var greenCount = 0;
-
-  history.forEach(function (h) {
-    var sc = Number(h.score) || 0;
-    sum += sc;
-    var label = h.label || "";
-    if (label.indexOf("Red") === 0) redCount++;
-    else if (label.indexOf("Yellow") === 0) yellowCount++;
-    else if (label.indexOf("Green") === 0) greenCount++;
-  });
-
-  var avg = sum / total;
-
-  // Simple trend (first 2 vs last 2)
-  var trendText = "";
-  if (history.length >= 4) {
-    var firstAvg =
-      (Number(history[0].score) + Number(history[1].score)) / 2;
-    var lastAvg =
-      (Number(history[history.length - 1].score) +
-        Number(history[history.length - 2].score)) /
-      2;
-
-    if (lastAvg - firstAvg > 1) {
-      trendText =
-        "Your recent scores are improving compared to earlier scans.";
-    } else if (firstAvg - lastAvg > 1) {
-      trendText =
-        "Recent scores are slightly lower than before, which may indicate increasing stress.";
-    } else {
-      trendText = "Your overall wellness has been fairly stable.";
-    }
-  }
-
-  // Colour pattern
-  var colourText = "";
-  if (redCount >= 2) {
-    colourText =
-      "You have had " +
-      redCount +
-      " high-stress (red) scans. It may help to plan more rest or talk to someone you trust.";
-  } else if (yellowCount > greenCount) {
-    colourText =
-      "Many of your scans are in the yellow zone. These are early warning signs; small changes in sleep, screen time and breaks can help.";
-  } else {
-    colourText =
-      "Most of your scans are in the green zone. Keep protecting your healthy habits.";
-  }
-
-  // Prediction based on last 3 scans
-  var predictionText = "";
-  if (history.length >= 3) {
-    var last3 = history.slice(-3);
-    var psum = 0;
-    last3.forEach(function (h) {
-      psum += Number(h.score) || 0;
-    });
-    var pred = psum / last3.length;
-    var level;
-    if (pred >= 9) level = "likely to be in the green zone (doing okay)";
-    else if (pred >= 5)
-      level = "likely to be in the yellow zone (mild stress)";
-    else level = "at risk of entering the red zone (high stress)";
-
-    predictionText =
-      "Based on your last three scans, your wellness for the next day is " +
-      level +
-      ".";
-  }
-
-  // Habit context (use today's habit score text if available)
-  var habitExtra = "";
-  if (habitScoreText) {
-    var t = habitScoreText.textContent || "";
-    if (t.indexOf("0 / 5") !== -1 || t.indexOf("1 / 5") !== -1) {
-      habitExtra =
-        "Your habit score today is quite low. Strengthening basic habits (sleep, water, movement, quiet time, low screen) will support better scores.";
-    } else if (t.indexOf("4 / 5") !== -1 || t.indexOf("5 / 5") !== -1) {
-      habitExtra =
-        "You are doing well with your daily habits. This strongly supports your mental health.";
-    }
-  }
-
-  insightsText.innerHTML =
-    "<strong>Latest status:</strong> " +
-    last.label +
-    " (score " +
-    Number(last.score).toFixed(1) +
-    ").<br>" +
-    "<strong>Average score:</strong> " +
-    avg.toFixed(1) +
-    " across " +
-    total +
-    " scans.<br>" +
-    (trendText ? "<strong>Trend:</strong> " + trendText + "<br>" : "") +
-    "<strong>Colour pattern:</strong> " +
-    colourText +
-    "<br>" +
-    (predictionText
-      ? "<strong>Prediction:</strong> " + predictionText + "<br>"
-      : "") +
-    (habitExtra ? "<strong>Habits:</strong> " + habitExtra : "");
-}
-
 
   historyList.innerHTML = "";
   if (!history.length) {
     var liEmpty = document.createElement("li");
     liEmpty.textContent = "No previous scans yet.";
     historyList.appendChild(liEmpty);
+    generateInsights();
     return;
   }
-  generateInsights();
 
   var copy = history.slice().reverse();
   for (var i = 0; i < copy.length; i++) {
@@ -481,6 +334,8 @@ function renderHistory() {
     li.appendChild(right);
     historyList.appendChild(li);
   }
+
+  generateInsights();
 }
 
 // ---------- EXTRA TIPS ----------
@@ -536,7 +391,7 @@ function startBreathingLoop() {
 
   function nextPhase() {
     if (!breathingOn) return;
-     
+
     if (phase === 0) {
       breathingInstruction.textContent = "Inhale slowly for 4 seconds…";
     } else if (phase === 1) {
@@ -544,10 +399,10 @@ function startBreathingLoop() {
     } else {
       breathingInstruction.textContent = "Exhale gently for 4 seconds…";
     }
-        if (navigator.vibrate) {
+
+    if (navigator.vibrate) {
       navigator.vibrate(80);
     }
-
 
     phase = (phase + 1) % 3;
     breathingTimer = setTimeout(nextPhase, 4000);
@@ -575,6 +430,182 @@ if (breathingToggle && breathingCircle) {
       breathingToggle.textContent = "Start breathing";
       stopBreathingLoop();
     }
+  });
+}
+
+// ---------- HABIT TRACKER ----------
+function updateHabitUI() {
+  if (!habitsForm || !habitScoreText) return;
+  var all = loadHabits();
+  var today = todayKey();
+  var todayData = all[today] || {};
+  var total = 5;
+  var done = 0;
+
+  ["sleep7", "water", "movement", "mindful", "lowScreen"].forEach(function (name) {
+    var input = habitsForm.elements[name];
+    if (input) {
+      input.checked = !!todayData[name];
+      if (input.checked) done++;
+    }
+  });
+
+  habitScoreText.textContent = "Today’s habit score: " + done + " / " + total;
+}
+
+if (habitsForm) {
+  habitsForm.addEventListener("change", function () {
+    var all = loadHabits();
+    var today = todayKey();
+    all[today] = {
+      sleep7: habitsForm.elements["sleep7"].checked,
+      water: habitsForm.elements["water"].checked,
+      movement: habitsForm.elements["movement"].checked,
+      mindful: habitsForm.elements["mindful"].checked,
+      lowScreen: habitsForm.elements["lowScreen"].checked
+    };
+    saveHabits(all);
+    updateHabitUI();
+    generateInsights();
+  });
+}
+
+// ---------- SMART INSIGHTS ----------
+function generateInsights() {
+  if (!insightsText) return;
+
+  var history = loadHistory();
+  if (!history.length) {
+    insightsText.textContent =
+      "Run MindScan a few times and we will show patterns in your stress, mood and habits here.";
+    return;
+  }
+
+  var last = history[history.length - 1];
+  var total = history.length;
+  var sum = 0;
+  var redCount = 0;
+  var yellowCount = 0;
+  var greenCount = 0;
+
+  history.forEach(function (h) {
+    var sc = Number(h.score) || 0;
+    sum += sc;
+    var label = h.label || "";
+    if (label.indexOf("Red") === 0) redCount++;
+    else if (label.indexOf("Yellow") === 0) yellowCount++;
+    else if (label.indexOf("Green") === 0) greenCount++;
+  });
+
+  var avg = sum / total;
+
+  var trendText = "";
+  if (history.length >= 4) {
+    var firstAvg =
+      (Number(history[0].score) + Number(history[1].score)) / 2;
+    var lastAvg =
+      (Number(history[history.length - 1].score) +
+        Number(history[history.length - 2].score)) /
+      2;
+
+    if (lastAvg - firstAvg > 1) {
+      trendText =
+        "Your recent scores are improving compared to earlier scans.";
+    } else if (firstAvg - lastAvg > 1) {
+      trendText =
+        "Recent scores are slightly lower than before, which may indicate increasing stress.";
+    } else {
+      trendText = "Your overall wellness has been fairly stable.";
+    }
+  }
+
+  var colourText = "";
+  if (redCount >= 2) {
+    colourText =
+      "You have had " +
+      redCount +
+      " high-stress (red) scans. It may help to plan more rest or talk to someone you trust.";
+  } else if (yellowCount > greenCount) {
+    colourText =
+      "Many of your scans are in the yellow zone. These are early warning signs; small changes in sleep, screen time and breaks can help.";
+  } else {
+    colourText =
+      "Most of your scans are in the green zone. Keep protecting your healthy habits.";
+  }
+
+  var predictionText = "";
+  if (history.length >= 3) {
+    var last3 = history.slice(-3);
+    var psum = 0;
+    last3.forEach(function (h) {
+      psum += Number(h.score) || 0;
+    });
+    var pred = psum / last3.length;
+    var level;
+    if (pred >= 9) level = "likely to be in the green zone (doing okay)";
+    else if (pred >= 5)
+      level = "likely to be in the yellow zone (mild stress)";
+    else level = "at risk of entering the red zone (high stress)";
+
+    predictionText =
+      "Based on your last three scans, your wellness for the next day is " +
+      level +
+      ".";
+  }
+
+  var habitExtra = "";
+  if (habitScoreText) {
+    var t = habitScoreText.textContent || "";
+    if (t.indexOf("0 / 5") !== -1 || t.indexOf("1 / 5") !== -1) {
+      habitExtra =
+        "Your habit score today is quite low. Strengthening basic habits (sleep, water, movement, quiet time, low screen) will support better scores.";
+    } else if (t.indexOf("4 / 5") !== -1 || t.indexOf("5 / 5") !== -1) {
+      habitExtra =
+        "You are doing well with your daily habits. This strongly supports your mental health.";
+    }
+  }
+
+  insightsText.innerHTML =
+    "<strong>Latest status:</strong> " +
+    last.label +
+    " (score " +
+    Number(last.score).toFixed(1) +
+    ").<br>" +
+    "<strong>Average score:</strong> " +
+    avg.toFixed(1) +
+    " across " +
+    total +
+    " scans.<br>" +
+    (trendText ? "<strong>Trend:</strong> " + trendText + "<br>" : "") +
+    "<strong>Colour pattern:</strong> " +
+    colourText +
+    "<br>" +
+    (predictionText
+      ? "<strong>Prediction:</strong> " + predictionText + "<br>"
+      : "") +
+    (habitExtra ? "<strong>Habits:</strong> " + habitExtra : "");
+}
+
+// ---------- THEME ----------
+function applyThemeFromStorage() {
+  var theme = localStorage.getItem(THEME_KEY);
+  if (theme === "light") {
+    document.body.classList.add("theme-light");
+  } else {
+    document.body.classList.remove("theme-light");
+  }
+}
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", function () {
+    var theme = localStorage.getItem(THEME_KEY);
+    if (theme === "light") {
+      theme = "dark";
+    } else {
+      theme = "light";
+    }
+    localStorage.setItem(THEME_KEY, theme);
+    applyThemeFromStorage();
   });
 }
 
@@ -652,27 +683,6 @@ if (saveProfileBtn) {
 if (extraTipsBtn) {
   extraTipsBtn.addEventListener("click", renderExtraTips);
 }
-function applyThemeFromStorage() {
-  var theme = localStorage.getItem(THEME_KEY);
-  if (theme === "light") {
-    document.body.classList.add("theme-light");
-  } else {
-    document.body.classList.remove("theme-light");
-  }
-}
-
-if (themeToggle) {
-  themeToggle.addEventListener("click", function () {
-    var theme = localStorage.getItem(THEME_KEY);
-    if (theme === "light") {
-      theme = "dark";
-    } else {
-      theme = "light";
-    }
-    localStorage.setItem(THEME_KEY, theme);
-    applyThemeFromStorage();
-  });
-}
 
 // ---------- INITIALISE ----------
 applyThemeFromStorage();
@@ -681,6 +691,7 @@ renderHistory();
 renderExtraTips();
 updateHabitUI();
 generateInsights();
+
 
 
   
