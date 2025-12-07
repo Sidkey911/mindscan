@@ -212,6 +212,36 @@
 
     <section class="card">
       <h2>Previous scans (local only)</h2>
+      <section class="card" id="habitsCard">
+  <h2>Daily habit tracker</h2>
+  <p class="hint">
+    Tick what you have done today. These simple habits strongly support your mental wellness.
+  </p>
+  <form id="habitsForm">
+    <label class="habit-item">
+      <input type="checkbox" name="sleep7" />
+      Slept at least 7 hours
+    </label>
+    <label class="habit-item">
+      <input type="checkbox" name="water" />
+      Drank at least 1 litre of water
+    </label>
+    <label class="habit-item">
+      <input type="checkbox" name="movement" />
+      Did some physical movement / exercise
+    </label>
+    <label class="habit-item">
+      <input type="checkbox" name="mindful" />
+      Did a short relaxation / prayer / mindfulness moment
+    </label>
+    <label class="habit-item">
+      <input type="checkbox" name="lowScreen" />
+      Limited non-study screen time at night
+    </label>
+    <p class="hint" id="habitScoreText">Today’s habit score: 0 / 5</p>
+  </form>
+</section>
+
       <p class="hint">
         Stored only in this browser. If you clear browser data, history will be deleted.
       </p>
