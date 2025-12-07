@@ -186,6 +186,29 @@ select:focus {
   font-size: 14px;
   line-height: 1.5;
 }
+.avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.wellness-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: #020617;
+  border: 1px solid #1f2937;
+}
+
+.avatar-text {
+  font-size: 14px;
+  color: #e5e7eb;
+}
 
 .suggestions {
   padding-left: 18px;
