@@ -243,6 +243,38 @@ select:focus {
 .history-score {
   font-weight: 600;
 }
+.theme-toggle {
+  font-size: 13px;
+  padding: 4px 10px;
+  margin-top: 8px;
+  float: right;
+}
+
+/* Light theme overrides */
+body.theme-light {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+body.theme-light .card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+body.theme-light .header,
+body.theme-light .footer {
+  background: transparent;
+}
+
+body.theme-light .subtitle,
+body.theme-light .hint {
+  color: #4b5563;
+}
+
+body.theme-light .history-score {
+  color: #075985;
+}
+
 
 /* Status colors */
 
