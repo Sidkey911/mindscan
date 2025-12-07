@@ -536,7 +536,7 @@ function startBreathingLoop() {
 
   function nextPhase() {
     if (!breathingOn) return;
-
+     
     if (phase === 0) {
       breathingInstruction.textContent = "Inhale slowly for 4 seconds…";
     } else if (phase === 1) {
@@ -544,6 +544,10 @@ function startBreathingLoop() {
     } else {
       breathingInstruction.textContent = "Exhale gently for 4 seconds…";
     }
+        if (navigator.vibrate) {
+      navigator.vibrate(80);
+    }
+
 
     phase = (phase + 1) % 3;
     breathingTimer = setTimeout(nextPhase, 4000);
