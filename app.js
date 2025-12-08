@@ -1,8 +1,9 @@
-// MindScan Lite main script
+// MindScan Lite main script (scanner page)
 
 const HISTORY_KEY = "mindscan_history_v1";
 const HABITS_KEY = "mindscan_habits_v1";
 const PROFILE_KEY = "mindscan_profile_v1";
+const BADGE_COUNT_KEY = "mindscan_badge_count_v1";
 
 // ---------- Helpers ----------
 
@@ -46,10 +47,6 @@ function loadProfile() {
   return loadJSON(PROFILE_KEY, {});
 }
 
-function saveProfile(p) {
-  saveJSON(PROFILE_KEY, p || {});
-}
-
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -64,29 +61,26 @@ const resultLabel = document.getElementById("resultLabel");
 const resultScore = document.getElementById("resultScore");
 const resultMessage = document.getElementById("resultMessage");
 const suggestionList = document.getElementById("suggestionList");
-const historyList = document.getElementById("historyList");
-const clearHistoryBtn = document.getElementById("clearHistory");
 const scoreBarInner = document.getElementById("scoreBarInner");
 const scoreBarLabel = document.getElementById("scoreBarLabel");
 const wellnessAvatar = document.getElementById("wellnessAvatar");
 const avatarText = document.getElementById("avatarText");
 const themeToggle = document.getElementById("themeToggle");
+const userGreeting = document.getElementById("userGreeting");
 
+// History modal
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistory");
+const showHistoryBtn = document.getElementById("showHistoryBtn");
+const historyModal = document.getElementById("historyModal");
+const historyModalClose = document.getElementById("historyModalClose");
+
+// Habits & insights
 const habitsForm = document.getElementById("habitsForm");
 const habitScoreText = document.getElementById("habitScoreText");
 const insightsText = document.getElementById("insightsText");
 
-const breathingCircle = document.getElementById("breathingCircle");
-const breathingInstruction = document.getElementById("breathingInstruction");
-const breathingToggle = document.getElementById("breathingToggle");
-
-const coachInput = document.getElementById("coachInput");
-const coachButton = document.getElementById("coachButton");
-const coachReply = document.getElementById("coachReply");
-
-const profileForm = document.getElementById("profileForm");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-
+// Intelligence / impact
 const trendTextEl = document.getElementById("trendText");
 const patternTextEl = document.getElementById("patternText");
 const predictionTextEl = document.getElementById("predictionText");
@@ -95,8 +89,34 @@ const planTextEl = document.getElementById("planText");
 const habitImpactList = document.getElementById("habitImpactList");
 const xpSummaryEl = document.getElementById("xpSummary");
 const badgeListEl = document.getElementById("badgeList");
+
+// Floating tips
 const extraTipsList = document.getElementById("extraTipsList");
 const extraTipsBtn = document.getElementById("extraTipsBtn");
+const tipsFab = document.getElementById("tipsFab");
+const tipsPanel = document.getElementById("tipsPanel");
+const tipsClose = document.getElementById("tipsClose");
+
+// Breathing
+const breathingFab = document.getElementById("breathingFab");
+const breathingPanel = document.getElementById("breathingPanel");
+const breathingClose = document.getElementById("breathingClose");
+const breathingCircle = document.getElementById("breathingCircle");
+const breathingInstruction = document.getElementById("breathingInstruction");
+const breathingToggle = document.getElementById("breathingToggle");
+let breathingTimer = null;
+
+// Coach
+const coachFab = document.getElementById("coachFab");
+const coachPanel = document.getElementById("coachPanel");
+const coachClose = document.getElementById("coachClose");
+const coachLog = document.getElementById("coachLog");
+const coachInput = document.getElementById("coachInput");
+const coachButton = document.getElementById("coachButton");
+
+// XP modal
+const xpModal = document.getElementById("xpModal");
+const xpModalClose = document.getElementById("xpModalClose");
 
 // ---------- Theme ----------
 
@@ -122,36 +142,19 @@ if (themeToggle) {
 
 initTheme();
 
-// ---------- Profile ----------
+// ---------- Greeting from profile ----------
 
-(function initProfile() {
-  if (!profileForm) return;
+(function initGreeting() {
+  if (!userGreeting) return;
   const p = loadProfile();
-  if (p) {
-    if (p.name) profileForm.elements.name.value = p.name;
-    if (p.age) profileForm.elements.age.value = p.age;
-    if (p.gender) profileForm.elements.gender.value = p.gender;
-    if (p.studentId) profileForm.elements.studentId.value = p.studentId;
-    if (p.course) profileForm.elements.course.value = p.course;
-    if (p.email) profileForm.elements.email.value = p.email;
+  if (p && p.name) {
+    userGreeting.textContent =
+      "Hi, " + p.name + ". Ready for today’s check-in?";
+  } else {
+    userGreeting.textContent =
+      "Hi, welcome to MindScan Lite. Run your first check-in to start.";
   }
 })();
-
-if (saveProfileBtn && profileForm) {
-  saveProfileBtn.addEventListener("click", () => {
-    const form = profileForm.elements;
-    const profile = {
-      name: form.name.value.trim(),
-      age: form.age.value,
-      gender: form.gender.value,
-      studentId: form.studentId.value.trim(),
-      course: form.course.value.trim(),
-      email: form.email.value.trim()
-    };
-    saveProfile(profile);
-    alert("Profile saved on this device.");
-  });
-}
 
 // ---------- Scoring logic ----------
 
@@ -167,7 +170,6 @@ function computeResult(values) {
   const negative = (stress - 1) * 1.5 + (screen - 1) * 1.0; // 0..8
   let raw = positive - negative; // -4 .. 20
 
-  // normalise to 0..12
   let norm = ((raw + 4) / 24) * 12;
   if (norm < 0) norm = 0;
   if (norm > 12) norm = 12;
@@ -192,7 +194,6 @@ function computeResult(values) {
 
   const suggestions = [];
 
-  // personalised actions
   if (sleep <= 2) {
     suggestions.push(
       "Plan a fixed sleep time tonight and avoid screens at least 30 minutes before bed."
@@ -271,7 +272,6 @@ function showResult(res) {
     suggestionList.appendChild(li);
   });
 
-  // Badge color
   resultBadge.classList.remove("status-green", "status-yellow", "status-red");
   if (res.label.startsWith("Green")) {
     resultBadge.classList.add("status-green");
@@ -281,7 +281,6 @@ function showResult(res) {
     resultBadge.classList.add("status-red");
   }
 
-  // Score bar
   if (scoreBarInner) {
     const pct = (res.score / 12) * 100;
     scoreBarInner.style.width = pct.toFixed(0) + "%";
@@ -290,7 +289,6 @@ function showResult(res) {
     scoreBarLabel.textContent = "Wellness level today (0–12 scale).";
   }
 
-  // Avatar
   if (wellnessAvatar) wellnessAvatar.textContent = res.avatar;
   if (avatarText) avatarText.textContent = res.avatarMsg;
 }
@@ -325,7 +323,7 @@ function renderHistory() {
   generateInsights();
 }
 
-// ---------- Insights, pattern detection, prediction, XP, habit impact ----------
+// ---------- Insights, patterns, prediction, XP, habit impact ----------
 
 function generateInsights() {
   if (!insightsText) return;
@@ -364,7 +362,6 @@ function generateInsights() {
 
   const avg = sum / total;
 
-  // Trend
   let trendText = "";
   if (history.length >= 4) {
     const firstAvg =
@@ -387,7 +384,6 @@ function generateInsights() {
     trendText = "More scans are needed to see a clear trend.";
   }
 
-  // Colour pattern
   let colourText = "";
   if (redCount >= 2) {
     colourText =
@@ -402,7 +398,6 @@ function generateInsights() {
       "Most of your scans are in the green zone. Keep protecting your healthy habits.";
   }
 
-  // Short-term prediction (next day)
   let predictionText = "";
   if (history.length >= 3) {
     const last3 = history.slice(-3);
@@ -424,7 +419,6 @@ function generateInsights() {
       "After a few more scans, we can start predicting your next-day wellness.";
   }
 
-  // Habit summary from today's habit widget
   let habitExtra = "";
   if (habitScoreText) {
     const t = habitScoreText.textContent || "";
@@ -437,7 +431,6 @@ function generateInsights() {
     }
   }
 
-  // Digital twin type
   let twinType;
   if (avg >= 9 && greenCount >= yellowCount && greenCount >= redCount) {
     twinType =
@@ -469,10 +462,10 @@ function generateInsights() {
     (habitExtra ? "<br><strong>Habits:</strong> " + habitExtra : "");
 
   if (trendTextEl) trendTextEl.textContent = "Trend: " + trendText;
-  if (predictionTextEl) predictionTextEl.textContent = "Prediction: " + predictionText;
+  if (predictionTextEl)
+    predictionTextEl.textContent = "Prediction: " + predictionText;
   if (twinTextEl) twinTextEl.textContent = "Your wellness type: " + twinType;
 
-  // Pattern detection
   let patternMessage = "";
   if (redCount >= 2 && avg < 6) {
     patternMessage =
@@ -489,7 +482,7 @@ function generateInsights() {
   }
   if (patternTextEl) patternTextEl.textContent = patternMessage;
 
-  // Action plan based on risk level
+  // Action plan based on pattern
   let planText = "";
   const highRisk =
     avg < 6 || redCount >= 2 || predictionText.includes("red zone");
@@ -500,13 +493,13 @@ function generateInsights() {
 
   if (highRisk) {
     planText =
-      "Action plan (next 3–7 days): 1) Protect sleep as your first priority (fixed bedtime, no screens 30–60 minutes before). 2) Do at least one short calming activity daily (breathing exercise in this app, prayer, journaling or quiet walk). 3) Reduce unnecessary screen time and multitasking. 4) Choose one safe person to talk to about how you feel. If you still get many red days, consider meeting a counsellor or mental health professional.";
+      "Next 3–7 days: 1) Protect sleep as your first priority (fixed bedtime, no screens 30–60 min before). 2) Do at least one short calming activity daily (breathing, prayer, journaling or quiet walk). 3) Reduce unnecessary screen time and multitasking. 4) Choose one safe person to talk to. If you still get many red days, consider meeting a counsellor or mental health professional.";
   } else if (moderateRisk) {
     planText =
-      "Action plan (next 3–7 days): 1) Identify your biggest stress source and break it into tiny tasks. 2) Keep a minimum of 7 hours of sleep on most nights. 3) Limit late-night scrolling and schedule at least one short break block every 60–90 minutes of study or work. 4) Use the breathing exercise on days when your score feels lower than usual.";
+      "Next 3–7 days: 1) Identify your biggest stress source and break it into tiny tasks. 2) Keep a minimum of 7 hours of sleep on most nights. 3) Limit late-night scrolling and schedule short breaks every 60–90 minutes. 4) Use the breathing exercise on days when your score feels lower than usual.";
   } else if (mostlyGreen) {
     planText =
-      "Action plan (maintenance): 1) Continue the habits that keep you in the green zone. 2) Plan buffer days before big exams instead of last-minute rush. 3) Share healthy strategies with a friend who may be struggling. 4) Keep using MindScan once or twice a week to detect early changes.";
+      "Maintenance: 1) Continue the habits that keep you in the green zone. 2) Plan buffer days before big exams instead of last-minute rush. 3) Share healthy strategies with a friend. 4) Use MindScan once or twice a week to catch early changes.";
   } else {
     planText =
       "Action plan: keep tracking your days and try simple adjustments – consistent sleep timing, a bit of daily movement, and short breaks away from screens. Use your trends to see which changes help you feel better.";
@@ -520,6 +513,16 @@ function generateInsights() {
     green: greenCount,
     yellow: yellowCount,
     red: redCount
+  });
+}
+
+function openXpModal() {
+  if (xpModal) xpModal.hidden = false;
+}
+
+if (xpModalClose && xpModal) {
+  xpModalClose.addEventListener("click", () => {
+    xpModal.hidden = true;
   });
 }
 
@@ -556,16 +559,16 @@ function updateHabitImpactAndXP(history, avgScore, counts) {
       });
     });
 
+    const avgFn = (arr) =>
+      arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+
     habitKeys.forEach((k) => {
       const s = stats[k];
       if (!s) return;
       if (s.with.length < 2 && s.without.length < 2) return;
 
-      const avg = (arr) =>
-        arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
-
-      const avgWith = s.with.length ? avg(s.with) : null;
-      const avgWithout = s.without.length ? avg(s.without) : null;
+      const avgWith = s.with.length ? avgFn(s.with) : null;
+      const avgWithout = s.without.length ? avgFn(s.without) : null;
       if (avgWith === null || avgWithout === null) return;
 
       const diff = avgWith - avgWithout;
@@ -600,7 +603,7 @@ function updateHabitImpactAndXP(history, avgScore, counts) {
     }
   }
 
-  // XP & badges
+  // XP & badges (shown only in popup)
   if (!xpSummaryEl || !badgeListEl) return;
 
   let xp = 0;
@@ -674,6 +677,14 @@ function updateHabitImpactAndXP(history, avgScore, counts) {
   if (!badgeListEl.children.length) {
     addBadge("Keep scanning and practising habits to unlock wellness badges.");
   }
+
+  // Show popup only when new badges are unlocked
+  const badgeCount = badgeListEl.children.length;
+  const prevCount = Number(localStorage.getItem(BADGE_COUNT_KEY) || "0");
+  if (badgeCount > prevCount) {
+    openXpModal();
+  }
+  localStorage.setItem(BADGE_COUNT_KEY, String(badgeCount));
 }
 
 // ---------- Habits ----------
@@ -717,27 +728,55 @@ function initHabits() {
 
 initHabits();
 
-// ---------- Breathing exercise ----------
+// ---------- Breathing exercise (auto 4–4–4 with stop) ----------
 
-if (breathingToggle && breathingCircle && breathingInstruction) {
-  let breathingOn = false;
-  breathingToggle.addEventListener("click", () => {
-    breathingOn = !breathingOn;
-    if (breathingOn) {
-      breathingCircle.classList.add("breathing-active");
-      breathingInstruction.textContent =
-        "Inhale for 4 seconds as the circle grows, hold for 4, exhale for 4 as it shrinks.";
-      breathingToggle.textContent = "Stop breathing exercise";
+function stopBreathingSession() {
+  if (!breathingCircle || !breathingInstruction) return;
+  breathingCircle.classList.remove("breathing-active");
+  breathingInstruction.textContent =
+    "Cycle finished. Tap \"Run again\" if you want another 4–4–4 session.";
+  if (breathingTimer) {
+    clearTimeout(breathingTimer);
+    breathingTimer = null;
+  }
+}
+
+function startBreathingSession() {
+  if (!breathingCircle || !breathingInstruction) return;
+  if (breathingTimer) clearTimeout(breathingTimer);
+  breathingCircle.classList.add("breathing-active");
+  breathingInstruction.textContent =
+    "Inhale for 4 seconds as the circle grows, hold for 4, exhale for 4 as it shrinks.";
+  const cycles = 3; // 3 × 12s = 36s
+  breathingTimer = setTimeout(stopBreathingSession, cycles * 12000);
+}
+
+if (breathingFab && breathingPanel) {
+  breathingFab.addEventListener("click", () => {
+    const willShow = breathingPanel.hidden;
+    breathingPanel.hidden = !willShow;
+    if (willShow) {
+      startBreathingSession();
     } else {
-      breathingCircle.classList.remove("breathing-active");
-      breathingInstruction.textContent =
-        "Tap \"Start breathing\" to begin a 4–4–4 breathing cycle.";
-      breathingToggle.textContent = "Start breathing";
+      stopBreathingSession();
     }
   });
 }
 
-// ---------- Extra tips ----------
+if (breathingClose && breathingPanel) {
+  breathingClose.addEventListener("click", () => {
+    breathingPanel.hidden = true;
+    stopBreathingSession();
+  });
+}
+
+if (breathingToggle) {
+  breathingToggle.addEventListener("click", () => {
+    startBreathingSession();
+  });
+}
+
+// ---------- Extra tips (hidden behind button) ----------
 
 const extraTipsPool = [
   "Do a 5-minute stretch or walk between classes to reset your body.",
@@ -749,6 +788,18 @@ const extraTipsPool = [
   "Schedule a short catch-up with a friend or family member.",
   "Change your study location for a fresh environment."
 ];
+
+if (tipsFab && tipsPanel) {
+  tipsFab.addEventListener("click", () => {
+    tipsPanel.hidden = !tipsPanel.hidden;
+  });
+}
+
+if (tipsClose && tipsPanel) {
+  tipsClose.addEventListener("click", () => {
+    tipsPanel.hidden = true;
+  });
+}
 
 if (extraTipsBtn && extraTipsList) {
   extraTipsBtn.addEventListener("click", () => {
@@ -762,7 +813,16 @@ if (extraTipsBtn && extraTipsList) {
   });
 }
 
-// ---------- AI Coach (rule-based) ----------
+// ---------- AI Coach (chat style, rule-based) ----------
+
+function appendCoachBubble(text, who) {
+  if (!coachLog) return;
+  const div = document.createElement("div");
+  div.className = "coach-bubble " + (who === "user" ? "user" : "bot");
+  div.textContent = text;
+  coachLog.appendChild(div);
+  coachLog.scrollTop = coachLog.scrollHeight;
+}
 
 function getCoachReply(text) {
   const t = (text || "").toLowerCase();
@@ -772,7 +832,7 @@ function getCoachReply(text) {
   }
 
   if (t.includes("sleep") || t.includes("insomnia") || t.includes("tidur")) {
-    return "Sleep problems are very common when stressed. Try to set a fixed cut-off time for screens, do 3–5 minutes of breathing, and keep your room dim and quiet. If this continues for many nights, talk to a counsellor or doctor.";
+    return "Sleep problems are very common when stressed. Try to set a fixed cut-off time for screens, do 3–5 minutes of slow breathing, and keep your room dim and quiet. If this continues for many nights, talk to a counsellor or doctor.";
   }
 
   if (
@@ -804,13 +864,77 @@ function getCoachReply(text) {
     return "Low motivation often means your brain is tired, not lazy. Start with a very small step (5–10 minutes of work), reward yourself, and connect the task to a personal goal or value that matters to you.";
   }
 
-  return "Thank you for sharing. Try to combine healthy basics (sleep, food, water, movement) with small, realistic tasks. If the feeling is heavy for many days, please consider reaching out to a counsellor or trusted adult for support.";
+  if (t.includes("sad") || t.includes("depress") || t.includes("down")) {
+    return "Feeling low for a while can be really heavy. Try gentle routines: regular sleep, daylight, movement and small positive activities. If you feel this way most days, please consider talking to a counsellor or mental health professional.";
+  }
+
+  return "Thank you for sharing. Try to combine healthy basics (sleep, food, water, movement) with small, realistic tasks. If the feeling is heavy for many days or you feel unsafe, please reach out to a counsellor, doctor, or trusted adult for support.";
 }
 
-if (coachButton && coachInput && coachReply) {
+if (coachFab && coachPanel) {
+  coachFab.addEventListener("click", () => {
+    const willShow = coachPanel.hidden;
+    coachPanel.hidden = !willShow;
+    if (willShow && coachLog && !coachLog.hasChildNodes()) {
+      appendCoachBubble(
+        "Hi, I am your wellness coach demo. You can ask about stress, sleep, study or mood, and I’ll suggest one small step you can try.",
+        "bot"
+      );
+    }
+  });
+}
+
+if (coachClose && coachPanel) {
+  coachClose.addEventListener("click", () => {
+    coachPanel.hidden = true;
+  });
+}
+
+if (coachButton && coachInput) {
   coachButton.addEventListener("click", () => {
     const q = coachInput.value.trim();
-    coachReply.textContent = getCoachReply(q);
+    if (!q) return;
+    appendCoachBubble(q, "user");
+    const reply = getCoachReply(q);
+    appendCoachBubble(reply, "bot");
+    coachInput.value = "";
+  });
+
+  coachInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      coachButton.click();
+    }
+  });
+}
+
+// ---------- History modal controls ----------
+
+if (showHistoryBtn && historyModal) {
+  showHistoryBtn.addEventListener("click", () => {
+    historyModal.hidden = false;
+  });
+}
+
+if (historyModalClose && historyModal) {
+  historyModalClose.addEventListener("click", () => {
+    historyModal.hidden = true;
+  });
+}
+
+if (historyModal) {
+  historyModal.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal-backdrop")) {
+      historyModal.hidden = true;
+    }
+  });
+}
+
+if (clearHistoryBtn) {
+  clearHistoryBtn.addEventListener("click", () => {
+    if (!confirm("Clear all previous scans on this device?")) return;
+    saveHistory([]);
+    renderHistory();
   });
 }
 
@@ -862,16 +986,7 @@ if (clearBtn && scanForm) {
   });
 }
 
-if (clearHistoryBtn) {
-  clearHistoryBtn.addEventListener("click", () => {
-    if (!confirm("Clear all previous scans on this device?")) return;
-    saveHistory([]);
-    renderHistory();
-  });
-}
-
 // ---------- Initial load ----------
 
 renderHistory();
 
-  
