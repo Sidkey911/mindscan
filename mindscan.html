@@ -21,7 +21,8 @@
       <span id="userGreeting">Hi, welcome to MindScan Lite.</span>
       <br />
       A quick self-check to see your current wellness level.
-      <a href="index.html" class="link">Change profile / user</a>
+      <a href="index.html" class="link">Change profile / user</a> ·
+      <a href="summary.html" class="link">View summary page</a>
     </p>
   </header>
 
@@ -147,14 +148,11 @@
       </p>
     </section>
 
-    <!-- PREVIOUS SCANS -->
-    <section class="card side-card">
-      <h2>Previous scans (local only)</h2>
-      <p class="hint">
-        Stored only in this browser. If you clear browser data, history will be deleted.
-      </p>
-      <ul id="historyList" class="history-list"></ul>
-      <button type="button" id="clearHistory" class="btn danger">Clear history</button>
+    <!-- HISTORY (MINIMISED) -->
+    <section class="card side-card" id="historyToggleCard">
+      <h2>Previous scans</h2>
+      <p class="hint">Your history is stored only on this device.</p>
+      <button type="button" class="btn" id="showHistoryBtn">View scan history</button>
     </section>
 
     <!-- HABIT TRACKER -->
@@ -216,60 +214,97 @@
       <p class="hint">How your daily habits relate to your wellness score.</p>
       <ul id="habitImpactList" class="suggestions"></ul>
     </section>
+  </main>
 
-    <!-- XP & BADGES -->
-    <section class="card side-card" id="xpCard">
-      <h2>Wellness XP & badges</h2>
-      <p class="hint">
-        You gain XP from consistent scans and healthy habits.
-      </p>
-      <p id="xpSummary" class="hint"></p>
-      <ul id="badgeList" class="suggestions"></ul>
-    </section>
+  <!-- FLOATING BUTTONS -->
+  <button class="fab fab-coach" id="coachFab" aria-label="Open wellness coach">🧠</button>
+  <button class="fab fab-breathing" id="breathingFab" aria-label="Open breathing exercise">🫁</button>
+  <button class="fab fab-tips" id="tipsFab" aria-label="Open wellness tips">💡</button>
 
-    <!-- EXTRA TIPS -->
-    <section class="card side-card" id="extraTipsSection">
-      <h2>Extra wellness tips</h2>
-      <p class="hint">
-        Tap the button to see more small wellness actions you can try today.
-      </p>
-      <ul id="extraTipsList" class="suggestions"></ul>
-      <button type="button" class="btn" id="extraTipsBtn">
-        Get more tips
-      </button>
-    </section>
-
-    <!-- BREATHING EXERCISE -->
-    <section class="card side-card" id="breathingSection">
-      <h2>Breathing exercise</h2>
-      <p class="hint">
-        Use this when you feel tense. Follow the circle as it grows and shrinks while you breathe.
-      </p>
-      <div class="breathing-wrapper">
-        <div class="breathing-circle" id="breathingCircle"></div>
-        <p id="breathingInstruction" class="breathing-text">
-          Tap "Start breathing" to begin a 4–4–4 breathing cycle.
-        </p>
-      </div>
-      <button type="button" class="btn" id="breathingToggle">
-        Start breathing
-      </button>
-    </section>
-
-    <!-- AI COACH -->
-    <section class="card side-card" id="coachCard">
-      <h2>AI Wellness Coach (beta)</h2>
-      <p class="hint">
-        Ask a short question about your stress, sleep or study routine, and the coach will suggest a small next step.
-      </p>
+  <!-- COACH PANEL -->
+  <div class="coach-panel" id="coachPanel" hidden>
+    <div class="coach-header">
+      <span>AI Wellness Coach (demo)</span>
+      <button type="button" class="coach-close" id="coachClose">&times;</button>
+    </div>
+    <div class="coach-body">
+      <div class="coach-log" id="coachLog"></div>
       <textarea
         id="coachInput"
-        rows="3"
-        placeholder="Example: I feel anxious about exams and can’t sleep. What should I do?"></textarea>
-      <button type="button" class="btn" id="coachButton">Ask coach</button>
-      <p id="coachReply" class="hint" style="margin-top:8px;"></p>
-    </section>
-  </main>
+        placeholder="Example: I feel anxious about exams and can't sleep. What should I do?"></textarea>
+      <button type="button" class="btn primary" id="coachButton">Send</button>
+      <p class="hint small">
+        This is a simple on-device demo coach for wellness tips, not a professional or emergency service.
+      </p>
+    </div>
+  </div>
+
+  <!-- BREATHING PANEL -->
+  <div class="breathing-panel" id="breathingPanel" hidden>
+    <div class="panel-header">
+      <span>Breathing exercise</span>
+      <button type="button" class="panel-close" id="breathingClose">&times;</button>
+    </div>
+    <p class="hint">
+      Follow the circle for a 4–4–4 breathing cycle: inhale 4s, hold 4s, exhale 4s. It will stop automatically.
+    </p>
+    <div class="breathing-wrapper">
+      <div class="breathing-circle" id="breathingCircle"></div>
+      <p id="breathingInstruction" class="breathing-text">
+        A breathing session starts each time you open this panel. You can run it again anytime.
+      </p>
+    </div>
+    <button type="button" class="btn" id="breathingToggle">Run again</button>
+  </div>
+
+  <!-- TIPS PANEL -->
+  <div class="tips-panel" id="tipsPanel" hidden>
+    <div class="panel-header">
+      <span>Extra wellness tips</span>
+      <button type="button" class="panel-close" id="tipsClose">&times;</button>
+    </div>
+    <p class="hint">
+      Tap the button to see three small actions you can try today.
+    </p>
+    <ul id="extraTipsList" class="suggestions"></ul>
+    <button type="button" class="btn" id="extraTipsBtn">Get tips</button>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div id="historyModal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-content">
+        <div class="modal-title-row">
+          <h3>Previous scans</h3>
+          <button type="button" class="modal-close-btn" id="historyModalClose">&times;</button>
+        </div>
+        <p class="hint">
+          Newest first. Stored only on this device. Clearing your browser data will remove this list.
+        </p>
+        <ul id="historyList" class="history-list"></ul>
+        <button type="button" id="clearHistory" class="btn danger">Clear history</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP & BADGES MODAL -->
+  <div id="xpModal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <div class="modal-content">
+        <div class="modal-title-row">
+          <h3>Wellness XP & badges</h3>
+          <button type="button" class="modal-close-btn" id="xpModalClose">&times;</button>
+        </div>
+        <p id="xpSummary" class="hint"></p>
+        <ul id="badgeList" class="suggestions"></ul>
+        <p class="hint small">
+          XP is unlocked from consistent scans and healthy habits. This pop-up appears when you unlock new badges.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <small>MindScan Lite - Wellness ICT demo for self awareness only</small>
@@ -278,3 +313,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
