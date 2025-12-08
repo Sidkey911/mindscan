@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MindScan Lite - Wellness Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-top">
+      <h1>MindScan Lite – Wellness check-in</h1>
+      <button type="button" class="btn theme-toggle" id="themeToggle">
+        Switch theme
+      </button>
+    </div>
+    <p class="subtitle">
+      <span id="userGreeting">Hi, welcome to MindScan Lite.</span>
+      <br />
+      A quick self-check to see your current wellness level.
+      <a href="index.html" class="link">Change profile / user</a>
+    </p>
+  </header>
+
+  <main class="container">
+    <!-- MAIN SCAN FORM -->
+    <section class="card main-card" id="scanSection">
+      <h2>Today, how are you feeling?</h2>
+      <form id="scanForm" class="form-grid">
+        <label>
+          Sleep quality last night
+          <span class="hint">(1 very poor, 5 very good)</span>
+          <select name="sleep" required>
+            <option value="">Select...</option>
+            <option value="1">1 - Very poor</option>
+            <option value="2">2 - Poor</option>
+            <option value="3">3 - Okay</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Very good</option>
+          </select>
+        </label>
+
+        <label>
+          Energy level now
+          <span class="hint">(1 very tired, 5 very energetic)</span>
+          <select name="energy" required>
+            <option value="">Select...</option>
+            <option value="1">1 - Very tired</option>
+            <option value="2">2 - Tired</option>
+            <option value="3">3 - Neutral</option>
+            <option value="4">4 - Fresh</option>
+            <option value="5">5 - Very energetic</option>
+          </select>
+        </label>
+
+        <label>
+          Motivation to study or work
+          <span class="hint">(1 no motivation, 5 very motivated)</span>
+          <select name="motivation" required>
+            <option value="">Select...</option>
+            <option value="1">1 - No motivation</option>
+            <option value="2">2 - Low</option>
+            <option value="3">3 - Moderate</option>
+            <option value="4">4 - High</option>
+            <option value="5">5 - Very high</option>
+          </select>
+        </label>
+
+        <label>
+          Stress level today
+          <span class="hint">(1 very low, 5 very high)</span>
+          <select name="stress" required>
+            <option value="">Select...</option>
+            <option value="1">1 - Very low</option>
+            <option value="2">2 - Low</option>
+            <option value="3">3 - Medium</option>
+            <option value="4">4 - High</option>
+            <option value="5">5 - Very high</option>
+          </select>
+        </label>
+
+        <label>
+          Total screen time today
+          <span class="hint">(phone or laptop for non study)</span>
+          <select name="screen" required>
+            <option value="">Select...</option>
+            <option value="1">Less than 3 hours</option>
+            <option value="2">3 to 6 hours</option>
+            <option value="3">More than 6 hours</option>
+          </select>
+        </label>
+
+        <label>
+          Overall mood now
+          <span class="hint">(1 very bad, 5 very good)</span>
+          <select name="mood" required>
+            <option value="">Select...</option>
+            <option value="1">1 - Very bad</option>
+            <option value="2">2 - Bad</option>
+            <option value="3">3 - Okay</option>
+            <option value="4">4 - Good</option>
+            <option value="5">5 - Very good</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Run MindScan</button>
+          <button type="button" id="clearBtn" class="btn btn-secondary">Clear form</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- RESULT -->
+    <section class="card main-card" id="resultCard" hidden>
+      <h2>Result</h2>
+
+      <div class="result-badge" id="resultBadge">
+        <span id="resultLabel">Status</span>
+        <span id="resultScore">Score: 0</span>
+      </div>
+
+      <div class="avatar-row">
+        <div class="wellness-avatar" id="wellnessAvatar" aria-label="Wellness avatar">🙂</div>
+        <p class="avatar-text" id="avatarText">
+          Your mind status will appear here after you run MindScan.
+        </p>
+      </div>
+
+      <div class="score-visual">
+        <div class="score-bar">
+          <div class="score-bar-inner" id="scoreBarInner"></div>
+        </div>
+        <p class="score-bar-label" id="scoreBarLabel">Wellness level</p>
+      </div>
+
+      <p id="resultMessage" class="result-message"></p>
+
+      <h3>Suggested small actions</h3>
+      <ul id="suggestionList" class="suggestions"></ul>
+
+      <p class="disclaimer">
+        This tool does not replace professional help. If you feel overwhelmed or unsafe,
+        please talk to someone you trust or contact a counsellor.
+      </p>
+    </section>
+
+    <!-- PREVIOUS SCANS -->
+    <section class="card side-card">
+      <h2>Previous scans (local only)</h2>
+      <p class="hint">
+        Stored only in this browser. If you clear browser data, history will be deleted.
+      </p>
+      <ul id="historyList" class="history-list"></ul>
+      <button type="button" id="clearHistory" class="btn danger">Clear history</button>
+    </section>
+
+    <!-- HABIT TRACKER -->
+    <section class="card side-card" id="habitsCard">
+      <h2>Daily habit tracker</h2>
+      <p class="hint">
+        Tick what you have done today. These simple habits strongly support your mental wellness.
+      </p>
+      <form id="habitsForm">
+        <label class="habit-item">
+          <input type="checkbox" name="sleep7" />
+          Slept at least 7 hours
+        </label>
+        <label class="habit-item">
+          <input type="checkbox" name="water" />
+          Drank at least 1 litre of water
+        </label>
+        <label class="habit-item">
+          <input type="checkbox" name="movement" />
+          Did some physical movement / exercise
+        </label>
+        <label class="habit-item">
+          <input type="checkbox" name="mindful" />
+          Did a short relaxation / prayer / mindfulness moment
+        </label>
+        <label class="habit-item">
+          <input type="checkbox" name="lowScreen" />
+          Limited non-study screen time at night
+        </label>
+        <p class="hint" id="habitScoreText">Today’s habit score: 0 / 5</p>
+      </form>
+    </section>
+
+    <!-- SMART INSIGHTS -->
+    <section class="card side-card" id="insightsCard">
+      <h2>Smart insights</h2>
+      <p class="hint">
+        Summary of your recent pattern based on your MindScan scores and daily habits.
+      </p>
+      <p id="insightsText">
+        Run MindScan a few times and fill your habit tracker to see personalised insights here.
+      </p>
+    </section>
+
+    <!-- WELLNESS INTELLIGENCE -->
+    <section class="card side-card" id="intelligenceCard">
+      <h2>Wellness intelligence</h2>
+      <p class="hint">Automatic analysis of your trends, patterns and wellness type.</p>
+      <p id="trendText" class="hint"></p>
+      <p id="patternText" class="hint"></p>
+      <p id="predictionText" class="hint"></p>
+      <p id="twinText" class="hint"></p>
+      <p id="planText" class="hint"></p>
+    </section>
+
+    <!-- HABIT IMPACT -->
+    <section class="card side-card" id="habitImpactCard">
+      <h2>Habit impact on your score</h2>
+      <p class="hint">How your daily habits relate to your wellness score.</p>
+      <ul id="habitImpactList" class="suggestions"></ul>
+    </section>
+
+    <!-- XP & BADGES -->
+    <section class="card side-card" id="xpCard">
+      <h2>Wellness XP & badges</h2>
+      <p class="hint">
+        You gain XP from consistent scans and healthy habits.
+      </p>
+      <p id="xpSummary" class="hint"></p>
+      <ul id="badgeList" class="suggestions"></ul>
+    </section>
+
+    <!-- EXTRA TIPS -->
+    <section class="card side-card" id="extraTipsSection">
+      <h2>Extra wellness tips</h2>
+      <p class="hint">
+        Tap the button to see more small wellness actions you can try today.
+      </p>
+      <ul id="extraTipsList" class="suggestions"></ul>
+      <button type="button" class="btn" id="extraTipsBtn">
+        Get more tips
+      </button>
+    </section>
+
+    <!-- BREATHING EXERCISE -->
+    <section class="card side-card" id="breathingSection">
+      <h2>Breathing exercise</h2>
+      <p class="hint">
+        Use this when you feel tense. Follow the circle as it grows and shrinks while you breathe.
+      </p>
+      <div class="breathing-wrapper">
+        <div class="breathing-circle" id="breathingCircle"></div>
+        <p id="breathingInstruction" class="breathing-text">
+          Tap "Start breathing" to begin a 4–4–4 breathing cycle.
+        </p>
+      </div>
+      <button type="button" class="btn" id="breathingToggle">
+        Start breathing
+      </button>
+    </section>
+
+    <!-- AI COACH -->
+    <section class="card side-card" id="coachCard">
+      <h2>AI Wellness Coach (beta)</h2>
+      <p class="hint">
+        Ask a short question about your stress, sleep or study routine, and the coach will suggest a small next step.
+      </p>
+      <textarea
+        id="coachInput"
+        rows="3"
+        placeholder="Example: I feel anxious about exams and can’t sleep. What should I do?"></textarea>
+      <button type="button" class="btn" id="coachButton">Ask coach</button>
+      <p id="coachReply" class="hint" style="margin-top:8px;"></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>MindScan Lite - Wellness ICT demo for self awareness only</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
