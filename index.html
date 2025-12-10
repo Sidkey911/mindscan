@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MindScan Lite - Login</title>
+  <title>MindScan Lite – Student Wellness Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
@@ -11,54 +12,49 @@
 </head>
 <body>
   <header class="header">
-    <div class="header-top">
-      <h1>MindScan Lite</h1>
-      <button type="button" class="btn theme-toggle" id="themeToggle">
-        Switch theme
-      </button>
+    <div class="header-inner">
+      <div>
+        <h1>MindScan Lite</h1>
+        <p class="subtitle">
+          A simple daily check-in to understand your mood, anxiety and stress.
+          This is for awareness only, not a medical diagnosis.
+        </p>
+      </div>
+      <a href="summary.html" class="link header-link">View my summary &amp; weekly pattern →</a>
     </div>
-    <p class="subtitle">
-      Welcome to MindScan Lite – a simple wellness checker for daily self-awareness.
-      <br />
-      Please fill in your basic profile, then we will bring you to the MindScan page.
-    </p>
   </header>
 
   <main class="container">
-    <section class="card main-card" id="loginCard">
-      <h2>Login / Profile</h2>
-      <p class="hint">
-        Your details are stored only on this device (local storage). You can change them anytime.
-      </p>
+    <!-- LEFT COLUMN: profile + scan + result -->
+    <section class="card main-card" id="profileSection">
+      <h2>Step 1 – Basic profile</h2>
+      <p class="hint">This helps personalise your chart and wellness coach. Saved only in this device.</p>
 
-      <form id="loginForm">
+      <form id="profileForm" class="profile-form">
         <label>
-          Full Name
+          Full name
           <input type="text" name="name" required />
         </label>
 
-        <label>
-          Age
-          <input type="number" name="age" min="10" max="80" required />
-        </label>
+        <div class="profile-grid">
+          <label>
+            Age
+            <input type="number" name="age" min="10" max="80" required />
+          </label>
+
+          <label>
+            Gender
+            <select name="gender" required>
+              <option value="">Select…</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+        </div>
 
         <label>
-          Gender
-          <select name="gender" required>
-            <option value="">Select...</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-
-        <label>
-          Student ID (optional)
-          <input type="text" name="studentId" />
-        </label>
-
-        <label>
-          Course / Class
+          Course / class
           <input type="text" name="course" />
         </label>
 
@@ -67,98 +63,282 @@
           <input type="email" name="email" />
         </label>
 
-        <div class="form-actions">
-          <button type="submit" class="btn primary">Save & go to MindScan</button>
+        <div class="profile-actions">
+          <button type="button" class="btn primary" id="saveProfileBtn">Save profile</button>
+          <span id="profileStatus" class="hint"></span>
         </div>
       </form>
+    </section>
 
-      <p class="hint" style="margin-top:10px;">
-        If you have used MindScan Lite before on this device, your profile will be loaded automatically.
+    <section class="card main-card" id="scanSection">
+      <h2>Step 2 – Today’s MindScan</h2>
+      <p class="hint">
+        For each item, choose how often it happened in the past few days.
+        Scale: 0 = Never, 1 = Sometimes, 2 = Often, 3 = Almost always.
       </p>
+
+      <form id="scanForm" class="form-grid">
+        <!-- Mood / low energy items (MD) -->
+        <label>
+          1. I feel sad or low most of the time.
+          <select name="q1" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          2. I find it hard to enjoy things like before.
+          <select name="q2" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          3. I feel tired or have low energy most days.
+          <select name="q3" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <!-- Anxiety (AN) -->
+        <label>
+          4. I feel worried or nervous a lot.
+          <select name="q4" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          5. My heart races or I feel “panicky”.
+          <select name="q5" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          6. I keep imagining worst case scenarios.
+          <select name="q6" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <!-- Stress / overload (ST) -->
+        <label>
+          7. I feel under a lot of pressure.
+          <select name="q7" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          8. I get easily irritated or tense.
+          <select name="q8" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <label>
+          9. It feels difficult to relax my mind.
+          <select name="q9" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Never</option>
+            <option value="1">1 – Sometimes</option>
+            <option value="2">2 – Often</option>
+            <option value="3">3 – Almost always</option>
+          </select>
+        </label>
+
+        <!-- Lifestyle factors -->
+        <label>
+          Sleep last night
+          <span class="hint">(1 very poor, 3 good)</span>
+          <select name="sleep" required>
+            <option value="">Select…</option>
+            <option value="1">1 – Very poor</option>
+            <option value="2">2 – Okay</option>
+            <option value="3">3 – Good</option>
+          </select>
+        </label>
+
+        <label>
+          Non-study screen time today
+          <span class="hint">(1 &lt;3h, 2 = 3–6h, 3 &gt; 6h)</span>
+          <select name="screen" required>
+            <option value="">Select…</option>
+            <option value="1">1 – Less than 3 hours</option>
+            <option value="2">2 – 3 to 6 hours</option>
+            <option value="3">3 – More than 6 hours</option>
+          </select>
+        </label>
+
+        <label>
+          Movement / exercise today
+          <span class="hint">(0 no, 1 yes)</span>
+          <select name="move" required>
+            <option value="">Select…</option>
+            <option value="0">0 – No</option>
+            <option value="1">1 – Yes</option>
+          </select>
+        </label>
+
+        <label>
+          Support from people
+          <span class="hint">(0 feel alone, 1 have some support)</span>
+          <select name="support" required>
+            <option value="">Select…</option>
+            <option value="0">0 – Mostly alone</option>
+            <option value="1">1 – Have some support</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Run MindScan</button>
+          <button type="button" class="btn" id="clearBtn">Clear form</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card main-card" id="resultCard" hidden>
+      <div class="avatar-row">
+        <div class="wellness-avatar" id="wellnessAvatar" aria-label="Wellness avatar">🙂</div>
+        <p class="avatar-text" id="avatarText">
+          Your mind status will appear here after you run MindScan.
+        </p>
+      </div>
+
+      <div class="score-visual">
+        <div class="score-bar">
+          <div class="score-bar-inner" id="scoreBarInner"></div>
+        </div>
+        <p class="score-bar-label" id="scoreBarLabel">Wellness level</p>
+      </div>
+
+      <div class="result-badge" id="resultBadge">
+        <span id="resultLabel">Status</span>
+        <span id="resultScore">Score: 0</span>
+      </div>
+      <p id="resultMessage" class="result-message"></p>
+
+      <h3>Wellness intelligence (mind map)</h3>
+      <div id="mindMap" class="mindmap"></div>
+
+      <h3>Personal action plan</h3>
+      <ul id="actionPlanList" class="suggestions"></ul>
+
+      <h3>Extra wellness tips</h3>
+      <p class="hint">Tap the button to receive one small action you can try today.</p>
+      <button type="button" class="btn" id="extraTipsBtn">Get a tip</button>
+      <ul id="extraTipsList" class="suggestions"></ul>
+
+      <p class="disclaimer">
+        MindScan Lite cannot replace professional support. If you feel overwhelmed, unsafe, or your symptoms last
+        for many days, please talk to someone you trust or a counsellor.
+      </p>
+    </section>
+
+    <!-- RIGHT COLUMN: history / chart -->
+    <section class="card side-card">
+      <h2>Previous scans &amp; weekly chart</h2>
+      <button type="button" class="btn btn-secondary" id="toggleHistoryBtn">Show history</button>
+      <p class="hint">Data is stored only in this browser. Clearing browser data will remove it.</p>
+
+      <div id="historyContent" hidden>
+        <div class="chart-wrapper">
+          <canvas id="weeklyChart"></canvas>
+        </div>
+
+        <h3>All past scans</h3>
+        <ul id="historyList" class="history-list"></ul>
+
+        <button type="button" class="btn danger" id="clearHistory">
+          Clear history
+        </button>
+      </div>
     </section>
   </main>
 
+  <!-- Floating breathing assistant -->
+  <button class="fab breathing-fab" id="breathingFab" aria-label="Breathing exercise">🫁</button>
+
+  <div class="side-panel" id="breathingPanel" hidden>
+    <div class="side-panel-header">
+      <h3>4–4–4 Breathing</h3>
+      <button class="icon-btn" id="closeBreathing">✕</button>
+    </div>
+    <p class="hint">
+      Follow the circle for one minute: inhale 4s, hold 4s, exhale 4s. This helps calm the body.
+    </p>
+    <div class="breathing-wrapper">
+      <div class="breathing-circle" id="breathingCircle"></div>
+      <p id="breathingInstruction" class="breathing-text">
+        Tap “Start” to begin one minute of guided breathing.
+      </p>
+      <p id="breathingCounter" class="breathing-counter">Ready</p>
+    </div>
+    <button type="button" class="btn primary" id="breathingToggle">Start</button>
+  </div>
+
+  <!-- Floating wellness coach -->
+  <button class="fab coach-fab" id="coachFab" aria-label="Wellness coach">❓</button>
+
+  <div class="side-panel coach-panel" id="coachPanel" hidden>
+    <div class="side-panel-header">
+      <h3>MindScan Wellness Coach</h3>
+      <button class="icon-btn" id="closeCoach">✕</button>
+    </div>
+    <p class="hint">
+      Ask about study stress, sleep, focus or emotions. The coach gives short, practical suggestions.
+    </p>
+    <div id="coachMessages" class="coach-messages"></div>
+    <form id="coachForm" class="coach-form">
+      <input
+        type="text"
+        id="coachInput"
+        placeholder="Type your question here…"
+        autocomplete="off"
+        required
+      />
+      <button type="submit" class="btn primary">Send</button>
+    </form>
+  </div>
+
   <footer class="footer">
-    <small>MindScan Lite - Wellness ICT demo for self awareness only</small>
+    <small>MindScan Lite – Student Wellness Innovation (demo only)</small>
   </footer>
 
-  <script>
-    // same theme handling as app.js
-    (function () {
-      const themeToggle = document.getElementById("themeToggle");
-      function initTheme() {
-        const stored = localStorage.getItem("mindscan_theme") || "light";
-        if (stored === "dark") {
-          document.body.classList.add("theme-light-dark");
-          if (themeToggle) themeToggle.textContent = "Switch to light theme";
-        } else {
-          if (themeToggle) themeToggle.textContent = "Switch to dark theme";
-        }
-      }
-      initTheme();
-
-      if (themeToggle) {
-        themeToggle.addEventListener("click", () => {
-          const isDark = document.body.classList.toggle("theme-light-dark");
-          localStorage.setItem("mindscan_theme", isDark ? "dark" : "light");
-          themeToggle.textContent = isDark
-            ? "Switch to light theme"
-            : "Switch to dark theme";
-        });
-      }
-
-      const PROFILE_KEY = "mindscan_profile_v1";
-      function loadProfile() {
-        try {
-          const raw = localStorage.getItem(PROFILE_KEY);
-          if (!raw) return {};
-          const data = JSON.parse(raw);
-          return data || {};
-        } catch {
-          return {};
-        }
-      }
-      function saveProfile(p) {
-        try {
-          localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-        } catch (e) {
-          console.log("Save profile error", e);
-        }
-      }
-
-      const loginForm = document.getElementById("loginForm");
-      if (loginForm) {
-        // prefill if profile exists
-        const p = loadProfile();
-        const f = loginForm.elements;
-        if (p.name) f.name.value = p.name;
-        if (p.age) f.age.value = p.age;
-        if (p.gender) f.gender.value = p.gender;
-        if (p.studentId) f.studentId.value = p.studentId;
-        if (p.course) f.course.value = p.course;
-        if (p.email) f.email.value = p.email;
-
-        loginForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          const profile = {
-            name: f.name.value.trim(),
-            age: f.age.value,
-            gender: f.gender.value,
-            studentId: f.studentId.value.trim(),
-            course: f.course.value.trim(),
-            email: f.email.value.trim()
-          };
-          if (!profile.name || !profile.age || !profile.gender) {
-            alert("Please fill in name, age and gender.");
-            return;
-          }
-          saveProfile(profile);
-          // go to main MindScan page
-          window.location.href = "mindscan.html";
-        });
-      }
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
-
