@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MindScan Lite – Student Wellness Checker</title>
+  <title>MMW (Mind Manage Website) – Student Wellness Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="style.css" />
@@ -10,15 +10,25 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.json" />
 </head>
+
 <body>
   <header class="header">
     <div class="header-inner">
       <div>
-        <h1>MindScan Lite</h1>
+        <h1>MMW</h1>
         <p class="subtitle">
-          A gentle daily check in for mood, anxiety and stress. This tool is for awareness only, not a diagnosis.
+          Mind Manage Website – a calm daily check in for mood, anxiety and stress.
+          For awareness only, not a diagnosis.
         </p>
+
+        <!-- Final touch: Presentation button -->
+        <div class="header-actions">
+          <button type="button" class="btn btn-secondary" id="presentToggle">
+            Presentation mode
+          </button>
+        </div>
       </div>
+
       <a href="summary.html" class="link header-link">View my summary and weekly trend →</a>
     </div>
   </header>
@@ -28,7 +38,7 @@
     <section class="card main-card" id="profileSection">
       <h2>Step 1 – Quick profile</h2>
       <p class="hint">
-        This helps personalise your MindScan and wellness coach. Data is stored only on this device.
+        This helps personalise your MMW results and wellness coach. Your data is stored only on this device.
       </p>
 
       <form id="profileForm" class="profile-form">
@@ -75,12 +85,11 @@
     <section class="card main-card" id="scanSection">
       <h2>Step 2 – Today’s MindScan</h2>
       <p class="hint">
-        Think about the past few days. For each item, choose how often it happened.
+        Think about the past few days. Choose how often each statement happened.
         Scale: 0 = Never, 1 = Sometimes, 2 = Often, 3 = Almost always.
       </p>
 
       <form id="scanForm" class="form-grid">
-        <!-- Mood / low energy items (MD) -->
         <label>
           1. I feel down or low more days than usual.
           <select name="q1" required>
@@ -114,7 +123,6 @@
           </select>
         </label>
 
-        <!-- Anxiety (AN) -->
         <label>
           4. My mind keeps worrying about assignments, money or the future.
           <select name="q4" required>
@@ -148,7 +156,6 @@
           </select>
         </label>
 
-        <!-- Stress / overload (ST) -->
         <label>
           7. I feel overloaded with tasks or responsibilities.
           <select name="q7" required>
@@ -182,7 +189,6 @@
           </select>
         </label>
 
-        <!-- Daily habits (for algorithm) -->
         <label>
           Sleep last night
           <span class="hint">(1 very poor, 3 good)</span>
@@ -260,12 +266,11 @@
       <ul id="actionPlanList" class="suggestions"></ul>
 
       <p class="disclaimer">
-        MindScan Lite does not replace mental health professionals. If you feel unsafe or your symptoms last many days,
+        MMW does not replace mental health professionals. If you feel unsafe or your symptoms last many days,
         please reach out to someone you trust or a counsellor.
       </p>
     </section>
 
-    <!-- RIGHT COLUMN: history / chart -->
     <section class="card side-card" id="historyCard">
       <h2>Previous scans and weekly chart</h2>
       <button type="button" class="btn btn-secondary" id="toggleHistoryBtn">Show history</button>
@@ -286,9 +291,7 @@
     </section>
   </main>
 
-  <!-- Floating breathing assistant -->
   <button class="fab breathing-fab" id="breathingFab" aria-label="Breathing exercise">🫁</button>
-
   <div class="side-panel" id="breathingPanel" hidden>
     <div class="side-panel-header">
       <h3>4–4–4 Breathing</h3>
@@ -307,12 +310,10 @@
     <button type="button" class="btn primary" id="breathingToggle">Start</button>
   </div>
 
-  <!-- Floating wellness coach -->
   <button class="fab coach-fab" id="coachFab" aria-label="Wellness coach">❓</button>
-
   <div class="side-panel coach-panel" id="coachPanel" hidden>
     <div class="side-panel-header">
-      <h3>MindScan Wellness Coach</h3>
+      <h3>MMW Wellness Coach</h3>
       <button class="icon-btn" id="closeCoach">✕</button>
     </div>
     <p class="hint">
@@ -320,38 +321,27 @@
     </p>
     <div id="coachMessages" class="coach-messages"></div>
     <form id="coachForm" class="coach-form">
-      <input
-        type="text"
-        id="coachInput"
-        placeholder="Type your question here…"
-        autocomplete="off"
-        required
-      />
+      <input type="text" id="coachInput" placeholder="Type your question here…" autocomplete="off" required />
       <button type="submit" class="btn primary">Send</button>
     </form>
   </div>
 
-  <!-- Floating tips button -->
   <button class="fab tips-fab" id="tipsFab" aria-label="Wellness tips">💡</button>
-
   <div class="side-panel tips-panel" id="tipsPanel" hidden>
     <div class="side-panel-header">
       <h3>Small wellness tips</h3>
       <button class="icon-btn" id="closeTips">✕</button>
     </div>
-    <p class="hint">
-      One small step you can try today. Tap “New tip” to refresh.
-    </p>
+    <p class="hint">One small step you can try today. Tap “New tip” to refresh.</p>
     <ul id="tipsList" class="suggestions"></ul>
     <button type="button" class="btn primary" id="tipsNewBtn">New tip</button>
   </div>
 
   <footer class="footer">
-    <small>MindScan Lite – Student Wellness Innovation (demo only)</small>
+    <small>MMW (Mind Manage Website) – Student Wellness Innovation</small>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-
