@@ -1,10 +1,11 @@
 {
-  "name": "MindScan Lite",
-  "short_name": "MindScan",
+  "name": "MMW (Mind Manage Website)",
+  "short_name": "MMW",
   "start_url": "/mindscan-/index.html",
+  "scope": "/mindscan-/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "background_color": "#F1F5F9",
+  "theme_color": "#0F766E",
   "icons": [
     {
       "src": "icon-192.png",
