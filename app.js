@@ -627,6 +627,27 @@ breathingToggle?.addEventListener("click", () => {
 });
 
 // =====================
+// PRESENTATION MODE (final touch)
+// =====================
+const presentToggle = document.getElementById("presentToggle");
+let isPresentation = false;
+
+presentToggle?.addEventListener("click", () => {
+  isPresentation = !isPresentation;
+
+  if (historyCard) historyCard.style.display = isPresentation ? "none" : "";
+  if (breathingFab) breathingFab.style.display = isPresentation ? "none" : "";
+  if (coachFab) coachFab.style.display = isPresentation ? "none" : "";
+  if (tipsFab) tipsFab.style.display = isPresentation ? "none" : "";
+
+  if (breathingPanel) breathingPanel.hidden = true;
+  if (coachPanel) coachPanel.hidden = true;
+  if (tipsPanel) tipsPanel.hidden = true;
+
+  presentToggle.textContent = isPresentation ? "Exit presentation mode" : "Presentation mode";
+});
+
+// =====================
 // WELLNESS COACH (Gemini via Worker)
 // =====================
 function pushMessage(role, text) {
