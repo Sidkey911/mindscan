@@ -1,7 +1,7 @@
 {
   "name": "MMW (Mind Manage Website)",
   "short_name": "MMW",
-  "start_url": "/MindManageWeb-/index.html",
+  "start_url": "/Mindscan-/index.html",
   "scope": "/MMW-/",
   "display": "standalone",
   "background_color": "#F1F5F9",
